@@ -143,6 +143,11 @@ class Redis
             signal(token)
           end
         end
+        if (tokens = all_tokens.map(&:to_i)).count < @resource_count
+          @resource_count.times do |index|
+            @redis.rpush(available_key, index) unless tokens.include?(index)
+          end
+        end
       end
     end
 
