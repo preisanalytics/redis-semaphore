@@ -186,6 +186,16 @@ describe "redis" do
       watchdog.release_stale_locks!
       expect(semaphore.locked?).to eq(false)
     end
+
+    it "can recreate lost semaphores" do
+      watchdog = Redis::Semaphore.new(:my_semaphore, :redis => @redis, :stale_client_timeout => 1)
+      semaphore.lock
+
+      expect(semaphore.locked?).to eq(true)
+      @redis.del(watchdog.send(:grabbed_key))
+      watchdog.release_stale_locks!
+      expect(semaphore.locked?).to eq(false)
+    end
   end
 
   describe "semaphore with staleness checking" do
